@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_DOCKER")
+}
+
+model Messages {
+  id                                Int      @id @default(autoincrement())
+  content                           String   @db.Text
+  user_send                         Int
+  user_receive                      Int
+  date                              DateTime @db.Timestamp() @default(now())
+  users_message_user_sendTousers    Users    @relation("message_user_sendTousers", fields: [user_send], references: [id], map: "message_relation_1")
+  users_message_user_receiveTousers Users    @relation("message_user_receveTousers", fields: [user_receive], references: [id], map: "message_relation_2")
+}
+
+model Users {
+  id                                 Int        @id @default(autoincrement())
+  firstname                          String     @db.VarChar(255)
+  lastname                           String     @db.VarChar(255)
+  email                              String     @unique @db.VarChar(255)
+  password                           String     @db.VarChar(255)
+  role                               Int
+  message_message_user_sendTousers   Messages[] @relation("message_user_sendTousers")
+  message_message_user_receveTousers Messages[] @relation("message_user_receveTousers")
+  role_users_roleTorole              Roles      @relation("users_roleTorole", fields: [role], references: [id], map: "users_relation_1")
+}
+
+model Roles {
+  id                     Int     @id @default(autoincrement())
+  name                   String  @db.VarChar(255)
+  users_users_roleTorole Users[] @relation("users_roleTorole")
+}
